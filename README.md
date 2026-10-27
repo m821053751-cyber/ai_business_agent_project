@@ -44,37 +44,37 @@
 
 ```mermaid
 flowchart TD
-    User([业务用户 / 管理员]) -->|1. 提问或交互| UI[Streamlit 前端交互大屏]
+    User["业务用户与管理员"] -->|1. 提问或交互| UI["Streamlit 前端交互大屏"]
 
     subgraph Presentation ["展示层 (Presentation Layer)"]
-        UI --> Tab1[经营总览看板]
-        UI --> Tab2[AI 分析助手]
-        UI --> Tab3[销售 / 库存 / 门店分析]
-        UI --> Tab4[主数据管理后台]
+        UI --> Tab1["经营总览看板"]
+        UI --> Tab2["AI 分析助手"]
+        UI --> Tab3["销售 / 库存 / 门店分析"]
+        UI --> Tab4["主数据管理后台"]
     end
 
     subgraph AgentEngine ["AI Agent 引擎层 (ReAct Loop)"]
-        Tab2 -->|传递 Query 与最近上下文| Agent[agent.py - 决策调度引擎]
-        Agent -->|系统 Prompt 约束 / 防幻觉| LLM[LLM 服务<br/>DeepSeek / GPT-4o]
-        LLM -->|返回 Tool Calls 意图| Guard{轮数守护与<br/>白名单校验}
-        Guard -->|合法调用| Dispatcher[工具分发器]
+        Tab2 -->|传递 Query 与上下文| Agent["agent.py 决策调度引擎"]
+        Agent -->|系统 Prompt 约束防幻觉| LLM["LLM 智能模型 (DeepSeek / GPT-4o)"]
+        LLM -->|返回 Tool Calls 意图| Guard{"轮数守护与白名单校验"}
+        Guard -->|合法调用| Dispatcher["工具分发器"]
         Dispatcher -->|执行结果 JSON| LLM
-        Guard -->|超过 5 轮 / 报错| Fallback[熔断总结 / 优雅降级]
+        Guard -->|超过 5 轮或异常| Fallback["熔断总结与优雅降级"]
     end
 
     subgraph ServiceLayer ["数据服务与安全边界 (Service Layer)"]
-        Dispatcher -->|只读查询 (只读白名单)| Tools[tools.py - 参数化只读工具]
-        Tab4 -->|写操作鉴权| Mgmt[management_service.py - 事务管理服务]
-        Mgmt -->|记录变更快照| Audit[(audit_logs 审计表)]
-        Mgmt -->|记录库存差异| Adjust[(inventory_adjustments 流水)]
+        Dispatcher -->|只读查询白名单| Tools["tools.py 参数化只读工具"]
+        Tab4 -->|管理员鉴权写入| Mgmt["management_service.py 事务管理"]
+        Mgmt -->|记录变更快照| Audit[("audit_logs 审计日志表")]
+        Mgmt -->|记录库存差异| Adjust[("inventory_adjustments 库存流水")]
     end
 
     subgraph DataLayer ["持久化层 (Data Storage Layer)"]
-        Tools -->|SQLAlchemy 连接池| MySQL[(MySQL 8.0 业务数据库)]
+        Tools -->|SQLAlchemy 连接池| MySQL[("MySQL 8.0 业务数据库")]
         Mgmt -->|SQLAlchemy 事务保障| MySQL
     end
 
-    LLM -->|最终结构化洞察 + 调用轨迹| Tab2
+    LLM -->|最终结构化洞察与调用轨迹| Tab2
 ```
 
 ---
