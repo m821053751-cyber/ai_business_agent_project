@@ -153,8 +153,8 @@ pip install -r requirements.txt
 cp .env.example .env
 # 编辑 .env，配置 MySQL 密码与 LLM API Key
 
-# 导入数据库结构
-mysql -u root -p < schema.sql
+# 导入数据库结构（推荐使用内置 Python 脚本，免配 MySQL 环境变量）
+python init_db.py
 
 # 填充模拟业务数据（3 门店、10 商品、84 笔订单流水）
 python seed_demo.py

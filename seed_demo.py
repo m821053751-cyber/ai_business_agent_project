@@ -1,7 +1,15 @@
 import random
+import sys
 from datetime import datetime, timedelta
 from db import get_engine
 from sqlalchemy import inspect, text
+
+if sys.platform == "win32":
+    try:
+        sys.stdout.reconfigure(encoding="utf-8")
+    except Exception:
+        pass
+
 
 def seed_demo_data():
     engine = get_engine()
@@ -69,7 +77,7 @@ def seed_demo_data():
         ]
         conn.execute(
             text("INSERT INTO products (id, sku, name, category, price, cost) VALUES (:id, :sku, :name, :category, :price, :cost)"),
-            products_data
+            products_data,
         )
 
         # 4. 写入 30 条门店库存记录 (3 门店 × 10 商品，部分设置低库存以触发预警)
@@ -81,11 +89,11 @@ def seed_demo_data():
                     "store_id": s["id"],
                     "product_id": p["id"],
                     "quantity": stock_qty,
-                    "safety_stock": 15
+                    "safety_stock": 15,
                 })
         conn.execute(
             text("INSERT INTO inventory (store_id, product_id, quantity, safety_stock) VALUES (:store_id, :product_id, :quantity, :safety_stock)"),
-            inventory_data
+            inventory_data,
         )
 
         # 5. 生成 84 个订单，每个订单随机抽取 3~6 种商品生成明细
@@ -115,7 +123,7 @@ def seed_demo_data():
                     "product_id": p["id"],
                     "quantity": qty,
                     "unit_price": unit_price,
-                    "subtotal": round(subtotal, 2)
+                    "subtotal": round(subtotal, 2),
                 })
                 item_id_counter += 1
 
@@ -124,19 +132,20 @@ def seed_demo_data():
                 "order_no": order_no,
                 "store_id": store_id,
                 "total_amount": round(order_total_amount, 2),
-                "order_date": order_date
+                "order_date": order_date,
             })
 
         conn.execute(
             text("INSERT INTO sales_orders (id, order_no, store_id, total_amount, order_date) VALUES (:id, :order_no, :store_id, :total_amount, :order_date)"),
-            orders_data
+            orders_data,
         )
         conn.execute(
             text("INSERT INTO sales_order_items (id, order_id, product_id, quantity, unit_price, subtotal) VALUES (:id, :order_id, :product_id, :quantity, :unit_price, :subtotal)"),
-            items_data
+            items_data,
         )
 
-    print("✅ 演示数据灌入完成：门店=3，商品=10，订单=84，库存=30。")
+    print("[SUCCESS] 演示数据灌入完成：门店=3，商品=10，订单=84，库存=30。")
+
 
 if __name__ == "__main__":
     seed_demo_data()
